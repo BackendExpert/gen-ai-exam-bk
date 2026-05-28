@@ -42,9 +42,21 @@ export class AuthService {
         ipAddress?: string,
         userAgent?: string,
     ) {
+
+        const checkuser = await this.userModel.findOne({ email: email })
+
+        if (!checkuser) {
+            throw new NotFoundException("User Not Found, Please Contect Admin and create Account")
+        }
+
         await this.authlinkModel.deleteMany({
             email,
         });
+
+        
+        if(checkuser.account_stats === false) {
+            throw new ConflictException("Your Account is Deactive now, Contact Admin")
+        }
 
         const authlink = GenerateAuthLink();
 
@@ -150,6 +162,15 @@ export class AuthService {
 
         if (!user) {
             throw new NotFoundException("User not found");
+        }
+
+        const hasLoggedIn = await this.auditlogModel.exists({
+            user: user._id,
+            action: "LOGIN_SUCCESS"
+        });
+
+        if (!hasLoggedIn) {
+            user.account_stats = true;
         }
 
         authlink.used = true;
