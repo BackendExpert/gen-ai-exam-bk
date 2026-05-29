@@ -163,6 +163,22 @@ export class UserController {
         return this.userService.DeletePermission(token, id, permission)
     }
 
+    @Delete('/clear-authlink')
+    @UseGuards(JwtAuthGuard, PermissionsGuard)
+    @Permissions('authlink:clear')
+
+    ClearAuthLink(
+        @Headers("authorization") authHeader: string,
+        @ClientInfoDecorator() client: ClientInfo
+    ) {
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            throw new UnauthorizedException("Invalid or missing token");
+        }
+        const token = authHeader.split(" ")[1];
+
+        return this.userService.ClearAuthLink(token)
+    }
+
     // @Post('/create-role')
     // @UseGuards(JwtAuthGuard, PermissionsGuard)
     // @Permissions('roles:create')

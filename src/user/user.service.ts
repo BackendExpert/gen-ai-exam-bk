@@ -323,6 +323,35 @@ export class UserService {
         };
     }
 
+    async ClearAuthLink(
+        token: string,
+        ipAddress?: string,
+        userAgent?: string,
+    ) {
+        const payload = await this.jwtService.verify(token)
+        const user = await this.userModel.findOne({ email: payload.email })
+
+        if (!user) {
+            throw new NotFoundException("The User Not Found")
+        }
+
+        const clearAuthLink = await this.authlinkModel.deleteMany({});
+
+        await createAuditLog(this.auditlogModel, {
+            user: user._id,
+            action: "AUTHLINK_CLEARED",
+            description: `Super Admin ${user.email} Clear the AuthLink Table`,
+            ipAddress,
+            userAgent,
+            metadata: { ipAddress, userAgent }
+        });
+
+        return {
+            success: true,
+            message: "Auth Link table Clear"
+        }
+    }
+
     // async CreateNewRole(
     //     token: string,
     //     role: string

@@ -6,6 +6,14 @@ export class CreateStudentDTO {
     full_name!: string;
 
     @IsNotEmpty()
+    @IsEmail()
+    email!: string;
+
+    @IsNotEmpty()
+    @IsString()
+    nic_no!: string;
+
+    @IsNotEmpty()
     @IsString()
     student_id!: string;
 
