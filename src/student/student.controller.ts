@@ -28,7 +28,32 @@ export class StudentController {
         }
         const token = authHeader.split(" ")[1];
 
-        return this.studentService.UploadStundents(token, dto)
+        return this.studentService.UploadStundents(
+            token,
+            dto,
+        )
+    }
+
+    @Post('/create-student')
+    @UseGuards(JwtAuthGuard, PermissionsGuard)
+    @Permissions('student:create')
+
+    CreateStudent(
+        @Headers("authorization") authHeader: string,
+        @Body() dto: CreateStudentDTO,
+        @ClientInfoDecorator() client: ClientInfo,
+    ) {
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            throw new UnauthorizedException("Invalid or missing token");
+        }
+        const token = authHeader.split(" ")[1];
+
+        return this.studentService.CreateStudent(
+            token,
+            dto,
+            client?.ipAddress,
+            client?.userAgent
+        )
     }
 
     @Get('/fetch-all')
